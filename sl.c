@@ -40,7 +40,12 @@
 
 #include <curses.h>
 #include <signal.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <windows.h>
+#define usleep(x) Sleep((x) / 1000)
+#endif
 #include "sl.h"
 
 int make_coffee(int x);
