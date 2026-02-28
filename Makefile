@@ -3,7 +3,7 @@
 #	Copyright 1993, 1998, 2014
 #                 Toyoda Masashi
 #		  (mtoyoda@acm.org)
-#	Last Modified: 2014/03/31
+#	Last Modified: 2015/06/01
 #==========================================
 
 CC=gcc
@@ -12,9 +12,10 @@ CFLAGS=-O -Wall
 all: sl
 
 sl: sl.c sl.h
-	$(CC) $(CFLAGS) -o sl sl.c -lncurses
+	$(CC) $(CFLAGS) -o pyonpyon sl.c -lncurses
+
 
 clean:
-	rm -f sl
+	rm -f pyonpyon
 
 distclean: clean

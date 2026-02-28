@@ -3,78 +3,109 @@
  *        Copyright 1993,1998,2014-2015
  *                  Toyoda Masashi
  *                  (mtoyoda@acm.org)
- *        Last Modified: 2014/06/03
+ *        Last Modified: 2015/06/01
  *========================================
  */
-/* sl version 5.03 : Fix some more compiler warnings.                        */
-/*                                              by Ryan Jacobs    2015/01/19 */
-/* sl version 5.02 : Fix compiler warnings.                                  */
-/*                                              by Jeff Schwab    2014/06/03 */
-/* sl version 5.01 : removed cursor and handling of IO                       */
-/*                                              by Chris Seymour  2014/01/03 */
-/* sl version 5.00 : add -c option                                           */
-/*                                              by Toyoda Masashi 2013/05/05 */
-/* sl version 4.00 : add C51, usleep(40000)                                  */
-/*                                              by Toyoda Masashi 2002/12/31 */
-/* sl version 3.03 : add usleep(20000)                                       */
-/*                                              by Toyoda Masashi 1998/07/22 */
-/* sl version 3.02 : D51 flies! Change options.                              */
-/*                                              by Toyoda Masashi 1993/01/19 */
-/* sl version 3.01 : Wheel turns smoother                                    */
-/*                                              by Toyoda Masashi 1992/12/25 */
+/* sl version 5.03 : Ah^~ My heart will be hopping^~.                         */
+/*                                              by Taichi Sugiyama 2015/06/01 */
+/* sl version 5.02 : Fix compiler warnings.                                   */
+/*                                              by Jeff Schwab     2014/06/03 */
+/* sl version 5.01 : removed cursor and handling of IO                        */
+/*                                              by Chris Seymour   2014/01/03 */
+/* sl version 5.00 : add -c option                                            */
+/*                                              by Toyoda Masashi  2013/05/05 */
+/* sl version 4.00 : add C51, usleep(40000)                                   */
+/*                                              by Toyoda Masashi  2002/12/31 */
+/* sl version 3.03 : add usleep(20000)                                        */
+/*                                              by Toyoda Masashi  1998/07/22 */
+/* sl version 3.02 : D51 flies! Change options.                               */
+/*                                              by Toyoda Masashi  1993/01/19 */
+/* sl version 3.01 : Wheel turns smoother                                     */
+/*                                              by Toyoda Masashi  1992/12/25 */
 /* sl version 3.00 : Add d(D51) option                                       */
-/*                                              by Toyoda Masashi 1992/12/24 */
-/* sl version 2.02 : Bug fixed.(dust remains in screen)                      */
-/*                                              by Toyoda Masashi 1992/12/17 */
-/* sl version 2.01 : Smoke run and disappear.                                */
-/*                   Change '-a' to accident option.                         */
-/*                                              by Toyoda Masashi 1992/12/16 */
-/* sl version 2.00 : Add a(all),l(long),F(Fly!) options.                     */
-/*                                              by Toyoda Masashi 1992/12/15 */
+/*                                              by Toyoda Masashi  1992/12/24 */
+/* sl version 2.02 : Bug fixed.(dust remains in screen)                       */
+/*                                              by Toyoda Masashi  1992/12/17 */
+/* sl version 2.01 : Smoke run and disappear.                                 */
+/*                   Change '-a' to accident option.                          */
+/*                                              by Toyoda Masashi  1992/12/16 */
+/* sl version 2.00 : Add a(all),l(long),F(Fly!) options.                      */
+/*                                              by Toyoda Masashi  1992/12/15 */
 /* sl version 1.02 : Add turning wheel.                                      */
-/*                                              by Toyoda Masashi 1992/12/14 */
-/* sl version 1.01 : Add more complex smoke.                                 */
-/*                                              by Toyoda Masashi 1992/12/14 */
-/* sl version 1.00 : SL runs vomiting out smoke.                             */
-/*                                              by Toyoda Masashi 1992/12/11 */
+/*                                              by Toyoda Masashi  1992/12/14 */
+/* sl version 1.01 : Add more complex smoke.                                  */
+/*                                              by Toyoda Masashi  1992/12/14 */
+/* sl version 1.00 : SL runs vomitting out smoke.                            */
+/*                                              by Toyoda Masashi  1992/12/11 */
 
 #include <curses.h>
 #include <signal.h>
 #include <unistd.h>
 #include "sl.h"
 
-void add_smoke(int y, int x);
-void add_man(int y, int x);
-int add_C51(int x);
-int add_D51(int x);
-int add_sl(int x);
+int make_coffee(int x);
+
+int add_chino(int x);
+int add_cocoa(int x);
+int add_chino_making_coffee(int f, int p);
+int add_cocoa_making_coffee(int f, int p);
+
+void add_counter();
+void add_smoke(int y, int x, int f);
+void add_tippy(int y, int x, int d, int f);
+
 void option(char *str);
 int my_mvaddstr(int y, int x, char *str);
 
-int ACCIDENT  = 0;
-int LOGO      = 0;
-int FLY       = 0;
-int C51       = 0;
+int ACCIDENT   = 0;
+int LOST_TIPPY = 0;
+int FLY        = 0;
+int COCOA      = 0;
 
 int my_mvaddstr(int y, int x, char *str)
 {
     for ( ; x < 0; ++x, ++str)
         if (*str == '\0')  return ERR;
-    for ( ; *str != '\0'; ++str, ++x)
+    for ( ; *str != '\0'; ++str, ++x) {
+        if (*str == '?') continue;
         if (mvaddch(y, x, *str) == ERR)  return ERR;
+    }
     return OK;
 }
 
 void option(char *str)
 {
-    extern int ACCIDENT, LOGO, FLY, C51;
+    extern int ACCIDENT, FLY, LONG;
 
     while (*str != '\0') {
         switch (*str++) {
-            case 'a': ACCIDENT = 1; break;
-            case 'F': FLY      = 1; break;
-            case 'l': LOGO     = 1; break;
-            case 'c': C51      = 1; break;
+            case 'a': ACCIDENT   = 1; break;
+            case 'F': FLY       = 1; break;
+            case 
+            //
+            // ｳｻｷﾞｶﾞｲﾅｲ
+            // ヘ(^o^)ヘ
+            // 　　　|∧
+            // 　　 /
+             'l'
+            // ｳｻｷﾞｶﾞｲﾅｲ?／
+            // 　　　(^o^)／
+            // 　　／( 　)
+            // ／　／ ＞ 
+             :
+            // ｩﾌｧﾌｧﾌｪ
+            // (^o^) 三
+            // (＼＼ 三
+            // ＜　＼ 三
+             LOST_TIPPY = 1;
+            // ＼ｳｻｷﾞｶﾞｲﾅｲ!!!
+            // (／o^)
+            // ( ／　
+            // ／ く
+            //　
+             break;
+
+            case 'c': COCOA      = 1; break;
             default:                break;
         }
     }
@@ -82,7 +113,7 @@ void option(char *str)
 
 int main(int argc, char *argv[])
 {
-    int x, i;
+    int x, i, f, maxf;
 
     for (i = 1; i < argc; ++i) {
         if (*argv[i] == '-') {
@@ -97,15 +128,18 @@ int main(int argc, char *argv[])
     leaveok(stdscr, TRUE);
     scrollok(stdscr, FALSE);
 
-    for (x = COLS - 1; ; --x) {
-        if (LOGO == 1) {
-            if (add_sl(x) == ERR) break;
-        }
-        else if (C51 == 1) {
-            if (add_C51(x) == ERR) break;
+    add_counter();
+    for (x = COLS - 1, f = 0 ; ; --x) {
+        if (x == (COLS - (COCOA == 1 ? COCOALENGTH : CHINOLENGTH)) / 2) {
+            if (f < (ACCIDENT == 1 ? (STARTACCIDENT2 + SPANACCIDENT2) : (STARTFINISHED + SPANFINISHED))) {
+                x++;
+                make_coffee(f++);
+            }
+        } else if (COCOA == 1) {
+            if (add_cocoa(x) == ERR) break;
         }
         else {
-            if (add_D51(x) == ERR) break;
+            if (add_chino(x) == ERR) break;
         }
         getch();
         refresh();
@@ -117,10 +151,9 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
-int add_sl(int x)
+int make_coffee(int f)
 {
-    static char *sl[LOGOPATTERNS][LOGOHEIGHT + 1]
+    static char *sl[LOGOPATTERNS][LOGOHIGHT + 1]
         = {{LOGO1, LOGO2, LOGO3, LOGO4, LWHL11, LWHL12, DELLN},
            {LOGO1, LOGO2, LOGO3, LOGO4, LWHL21, LWHL22, DELLN},
            {LOGO1, LOGO2, LOGO3, LOGO4, LWHL31, LWHL32, DELLN},
@@ -128,10 +161,10 @@ int add_sl(int x)
            {LOGO1, LOGO2, LOGO3, LOGO4, LWHL51, LWHL52, DELLN},
            {LOGO1, LOGO2, LOGO3, LOGO4, LWHL61, LWHL62, DELLN}};
 
-    static char *coal[LOGOHEIGHT + 1]
+    static char *coal[LOGOHIGHT + 1]
         = {LCOAL1, LCOAL2, LCOAL3, LCOAL4, LCOAL5, LCOAL6, DELLN};
 
-    static char *car[LOGOHEIGHT + 1]
+    static char *car[LOGOHIGHT + 1]
         = {LCAR1, LCAR2, LCAR3, LCAR4, LCAR5, LCAR6, DELLN};
 
     int i, y, py1 = 0, py2 = 0, py3 = 0;
@@ -140,10 +173,10 @@ int add_sl(int x)
     y = LINES / 2 - 3;
 
     if (FLY == 1) {
-        y = (x / 6) + LINES - (COLS / 6) - LOGOHEIGHT;
+        y = (x / 6) + LINES - (COLS / 6) - LOGOHIGHT;
         py1 = 2;  py2 = 4;  py3 = 6;
     }
-    for (i = 0; i <= LOGOHEIGHT; ++i) {
+    for (i = 0; i <= LOGOHIGHT; ++i) {
         my_mvaddstr(y + i, x, sl[(LOGOLENGTH + x) / 3 % LOGOPATTERNS][i]);
         my_mvaddstr(y + i + py1, x + 21, coal[i]);
         my_mvaddstr(y + i + py2, x + 42, car[i]);
@@ -158,10 +191,9 @@ int add_sl(int x)
     return OK;
 }
 
-
-int add_D51(int x)
+int add_chino_making_coffee(int f, int p)
 {
-    static char *d51[D51PATTERNS][D51HEIGHT + 1]
+    static char *d51[D51PATTERNS][D51HIGHT + 1]
         = {{D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
             D51WHL11, D51WHL12, D51WHL13, D51DEL},
            {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
@@ -174,7 +206,7 @@ int add_D51(int x)
             D51WHL51, D51WHL52, D51WHL53, D51DEL},
            {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
             D51WHL61, D51WHL62, D51WHL63, D51DEL}};
-    static char *coal[D51HEIGHT + 1]
+    static char *coal[D51HIGHT + 1]
         = {COAL01, COAL02, COAL03, COAL04, COAL05,
            COAL06, COAL07, COAL08, COAL09, COAL10, COALDEL};
 
@@ -184,24 +216,30 @@ int add_D51(int x)
     y = LINES / 2 - 5;
 
     if (FLY == 1) {
-        y = (x / 7) + LINES - (COLS / 7) - D51HEIGHT;
+        y = (x / 7) + LINES - (COLS / 7) - D51HIGHT;
         dy = 1;
     }
-    for (i = 0; i <= D51HEIGHT; ++i) {
+    for (i = 0; i <= D51HIGHT; ++i) {
         my_mvaddstr(y + i, x, d51[(D51LENGTH + x) % D51PATTERNS][i]);
         my_mvaddstr(y + i + dy, x + 53, coal[i]);
     }
-    if (ACCIDENT == 1) {
-        add_man(y + 2, x + 43);
-        add_man(y + 2, x + 47);
+    if (LOST_TIPPY != 1) {
+        add_tippy(y - TIPPYHEIGHT + 1, x + 3, p + 1, f);
     }
-    add_smoke(y - 1, x + D51FUNNEL);
+    add_smoke(y - (LOST_TIPPY != 1 ? TIPPYHEIGHT - 1 : 0) - 1, x + 5, f);
     return OK;
 }
 
-int add_C51(int x)
+void add_counter(){
+    int x;
+    for (x = 0 ; x  < COLS ; x++) {
+        mvaddch((LINES + CHINOHEIGHT + TIPPYHEIGHT) / 2, x, '-');
+    }
+}
+
+int add_chino(int x)
 {
-    static char *c51[C51PATTERNS][C51HEIGHT + 1]
+    static char *c51[C51PATTERNS][C51HIGHT + 1]
         = {{C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
             C51WH11, C51WH12, C51WH13, C51WH14, C51DEL},
            {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
@@ -214,44 +252,56 @@ int add_C51(int x)
             C51WH51, C51WH52, C51WH53, C51WH54, C51DEL},
            {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
             C51WH61, C51WH62, C51WH63, C51WH64, C51DEL}};
-    static char *coal[C51HEIGHT + 1]
+    static char *coal[C51HIGHT + 1]
         = {COALDEL, COAL01, COAL02, COAL03, COAL04, COAL05,
            COAL06, COAL07, COAL08, COAL09, COAL10, COALDEL};
 
-    int y, i, dy = 0;
+    int y, i;
 
     if (x < - C51LENGTH)  return ERR;
     y = LINES / 2 - 5;
 
     if (FLY == 1) {
-        y = (x / 7) + LINES - (COLS / 7) - C51HEIGHT;
+        y = (x / 7) + LINES - (COLS / 7) - C51HIGHT;
         dy = 1;
     }
-    for (i = 0; i <= C51HEIGHT; ++i) {
+    for (i = 0; i <= C51HIGHT; ++i) {
         my_mvaddstr(y + i, x, c51[(C51LENGTH + x) % C51PATTERNS][i]);
         my_mvaddstr(y + i + dy, x + 55, coal[i]);
     }
-    if (ACCIDENT == 1) {
-        add_man(y + 3, x + 45);
-        add_man(y + 3, x + 49);
+    if (LOST_TIPPY != 1) {
+        add_tippy(y - TIPPYHEIGHT + 1, x + 2, 0, x + (COCOA == 1 ? COCOALENGTH : CHINOLENGTH));
     }
-    add_smoke(y - 1, x + C51FUNNEL);
+    add_smoke(y - (LOST_TIPPY != 1 ? TIPPYHEIGHT - 1 : 0) - 1, x + COCOALENGTH / 2, 0);
     return OK;
 }
 
-
-void add_man(int y, int x)
+void add_tippy(int y, int x, int d, int f)
 {
-    static char *man[2][2] = {{"", "(O)"}, {"Help!", "\\O/"}};
     int i;
-
-    for (i = 0; i < 2; ++i) {
-        my_mvaddstr(y + i, x, man[(LOGOLENGTH + x) / 12 % 2][i]);
+    static char *tippy[3][TIPPYPATTERNS][TIPPYHEIGHT] = {
+        {{TIPPYLEFT01A, TIPPYLEFT02A, TIPPYLEFT03A, TIPPYLEFT04A, TIPPYLEFT05A},
+         {TIPPYLEFT01A, TIPPYLEFT02A, TIPPYLEFT03A, TIPPYLEFT04A, TIPPYLEFT05A},
+         {TIPPYLEFT01B, TIPPYLEFT02B, TIPPYLEFT03B, TIPPYLEFT04B, TIPPYLEFT05B},
+         {TIPPYLEFT01C, TIPPYLEFT02C, TIPPYLEFT03C, TIPPYLEFT04C, TIPPYLEFT05C},
+         {TIPPYLEFT01C, TIPPYLEFT02C, TIPPYLEFT03C, TIPPYLEFT04C, TIPPYLEFT05C}},
+        {{TIPPYFRONT01A, TIPPYFRONT02A, TIPPYFRONT03A, TIPPYFRONT04A, TIPPYFRONT05A},
+         {TIPPYFRONT01A, TIPPYFRONT02A, TIPPYFRONT03A, TIPPYFRONT04A, TIPPYFRONT05A},
+         {TIPPYFRONT01B, TIPPYFRONT02B, TIPPYFRONT03B, TIPPYFRONT04B, TIPPYFRONT05B},
+         {TIPPYFRONT01C, TIPPYFRONT02C, TIPPYFRONT03C, TIPPYFRONT04C, TIPPYFRONT05C},
+         {TIPPYFRONT01C, TIPPYFRONT02C, TIPPYFRONT03C, TIPPYFRONT04C, TIPPYFRONT05C}},
+        {{TIPPYRIGHT01A, TIPPYRIGHT02A, TIPPYRIGHT03A, TIPPYRIGHT04A, TIPPYRIGHT05A},
+         {TIPPYRIGHT01A, TIPPYRIGHT02A, TIPPYRIGHT03A, TIPPYRIGHT04A, TIPPYRIGHT05A},
+         {TIPPYRIGHT01B, TIPPYRIGHT02B, TIPPYRIGHT03B, TIPPYRIGHT04B, TIPPYRIGHT05B},
+         {TIPPYRIGHT01C, TIPPYRIGHT02C, TIPPYRIGHT03C, TIPPYRIGHT04C, TIPPYRIGHT05C},
+         {TIPPYRIGHT01C, TIPPYRIGHT02C, TIPPYRIGHT03C, TIPPYRIGHT04C, TIPPYRIGHT05C}}
+        };
+    for (i = 0; i < TIPPYHEIGHT; ++i) {
+        my_mvaddstr(y + i, x, tippy[d][FLY == 1 ? (f / 3 % TIPPYPATTERNS) : 0][i]);
     }
 }
 
-
-void add_smoke(int y, int x)
+void add_smoke(int y, int x, int f)
 #define SMOKEPTNS        16
 {
     static struct smokes {
@@ -279,7 +329,7 @@ void add_smoke(int y, int x)
                                  2,  2, 2, 3, 3, 3             };
     int i;
 
-    if (x % 4 == 0) {
+    if ((x + f) % 4 == 0) {
         for (i = 0; i < sum; ++i) {
             my_mvaddstr(S[i].y, S[i].x, Eraser[S[i].ptrn]);
             S[i].y    -= dy[S[i].ptrn];
