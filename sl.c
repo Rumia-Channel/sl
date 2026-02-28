@@ -8,8 +8,14 @@
  */
 /* sl version 5.03 : Fix some more compiler warnings.                        */
 /*                                              by Ryan Jacobs    2015/01/19 */
+/* sl version 5.1e : mayakatasonize                                          */
+/*                   restore -l -c options.                                  */
+/*                                             by Taichi Sugiyama 2014/ 6/10 */
 /* sl version 5.02 : Fix compiler warnings.                                  */
 /*                                              by Jeff Schwab    2014/06/03 */
+/* sl version 5.01e: erutasonize                                             */
+/*                   delete -l -c options.                                   */
+/*                                             by Taichi Sugiyama 2014/ 3/26 */
 /* sl version 5.01 : removed cursor and handling of IO                       */
 /*                                              by Chris Seymour  2014/01/03 */
 /* sl version 5.00 : add -c option                                           */
@@ -43,18 +49,20 @@
 #include <unistd.h>
 #include "sl.h"
 
+void add_kininarimasu(int y, int x);
+void add_fukuchan(int y, int x);
+void add_lolinarimasu(int y, int x);
 void add_smoke(int y, int x);
-void add_man(int y, int x);
-int add_C51(int x);
-int add_D51(int x);
-int add_sl(int x);
+int add_erutaso(int x);
+int add_mayakataso(int x);
+int add_lolitaso(int x);
 void option(char *str);
 int my_mvaddstr(int y, int x, char *str);
 
 int ACCIDENT  = 0;
-int LOGO      = 0;
 int FLY       = 0;
-int C51       = 0;
+int MAYAKA    = 0;
+int LOLI    = 0;
 
 int my_mvaddstr(int y, int x, char *str)
 {
@@ -67,16 +75,16 @@ int my_mvaddstr(int y, int x, char *str)
 
 void option(char *str)
 {
-    extern int ACCIDENT, LOGO, FLY, C51;
+    extern int ACCIDENT, FLY, LOLI, MAYAKA;
 
     while (*str != '\0') {
-        switch (*str++) {
-            case 'a': ACCIDENT = 1; break;
-            case 'F': FLY      = 1; break;
-            case 'l': LOGO     = 1; break;
-            case 'c': C51      = 1; break;
-            default:                break;
-        }
+		switch (*str++) {
+		    case 'a': ACCIDENT = 1; break;
+		    case 'F': FLY      = 1; break;
+		    case 'l': LOLI     = 1; break;
+		    case 'c': MAYAKA   = 1; break;
+		    default:                break;
+		}
     }
 }
 
@@ -98,14 +106,14 @@ int main(int argc, char *argv[])
     scrollok(stdscr, FALSE);
 
     for (x = COLS - 1; ; --x) {
-        if (LOGO == 1) {
-            if (add_sl(x) == ERR) break;
+        if (LOLI == 1) {
+            if (add_lolitaso(x) == ERR) break;
         }
-        else if (C51 == 1) {
-            if (add_C51(x) == ERR) break;
+        else if (MAYAKA == 1) {
+            if (add_mayakataso(x) == ERR) break;
         }
         else {
-            if (add_D51(x) == ERR) break;
+            if (add_erutaso(x) == ERR) break;
         }
         getch();
         refresh();
@@ -118,136 +126,108 @@ int main(int argc, char *argv[])
 }
 
 
-int add_sl(int x)
+int add_erutaso(int x)
 {
-    static char *sl[LOGOPATTERNS][LOGOHEIGHT + 1]
-        = {{LOGO1, LOGO2, LOGO3, LOGO4, LWHL11, LWHL12, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL21, LWHL22, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL31, LWHL32, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL41, LWHL42, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL51, LWHL52, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL61, LWHL62, DELLN}};
+    static char *erutaso[ERUTASOPATTERNS][ERUTASOHIGHT + 1]
+	= {{ERUTASO11, ERUTASO12, ERUTASO13, ERUTASO14, ERUTASO15, ERUTASO16, ERUTASO17, ERUTASO18, ERUTASO19, ERUTASO1DEL},
+	   {ERUTASO21, ERUTASO22, ERUTASO23, ERUTASO24, ERUTASO25, ERUTASO26, ERUTASO27, ERUTASO28, ERUTASO29, ERUTASO2DEL},
+	   {ERUTASO31, ERUTASO32, ERUTASO33, ERUTASO34, ERUTASO35, ERUTASO36, ERUTASO37, ERUTASO38, ERUTASO39, ERUTASO3DEL},
+	   {ERUTASO41, ERUTASO42, ERUTASO43, ERUTASO44, ERUTASO45, ERUTASO46, ERUTASO47, ERUTASO48, ERUTASO49, ERUTASO4DEL},
+	   {ERUTASO31, ERUTASO32, ERUTASO33, ERUTASO34, ERUTASO35, ERUTASO36, ERUTASO37, ERUTASO38, ERUTASO39, ERUTASO3DEL},
+	   {ERUTASO21, ERUTASO22, ERUTASO23, ERUTASO24, ERUTASO25, ERUTASO26, ERUTASO27, ERUTASO28, ERUTASO29, ERUTASO2DEL}};
 
-    static char *coal[LOGOHEIGHT + 1]
-        = {LCOAL1, LCOAL2, LCOAL3, LCOAL4, LCOAL5, LCOAL6, DELLN};
+    int i, y;
 
-    static char *car[LOGOHEIGHT + 1]
-        = {LCAR1, LCAR2, LCAR3, LCAR4, LCAR5, LCAR6, DELLN};
-
-    int i, y, py1 = 0, py2 = 0, py3 = 0;
-
-    if (x < - LOGOLENGTH)  return ERR;
+    if (x < - ERUTASOLENGTH)  return ERR;
     y = LINES / 2 - 3;
 
     if (FLY == 1) {
-        y = (x / 6) + LINES - (COLS / 6) - LOGOHEIGHT;
-        py1 = 2;  py2 = 4;  py3 = 6;
+		y = (x / 6) + LINES - (COLS / 6) - ERUTASOHIGHT;
     }
-    for (i = 0; i <= LOGOHEIGHT; ++i) {
-        my_mvaddstr(y + i, x, sl[(LOGOLENGTH + x) / 3 % LOGOPATTERNS][i]);
-        my_mvaddstr(y + i + py1, x + 21, coal[i]);
-        my_mvaddstr(y + i + py2, x + 42, car[i]);
-        my_mvaddstr(y + i + py3, x + 63, car[i]);
+    for (i = 0; i <= ERUTASOHIGHT; ++i) {
+		my_mvaddstr(y + i, x, erutaso[(ERUTASOLENGTH + x) / 3 % ERUTASOPATTERNS][i]);
     }
     if (ACCIDENT == 1) {
-        add_man(y + 1, x + 14);
-        add_man(y + 1 + py2, x + 45);  add_man(y + 1 + py2, x + 53);
-        add_man(y + 1 + py3, x + 66);  add_man(y + 1 + py3, x + 74);
+		add_kininarimasu(y , x + 16);
     }
-    add_smoke(y - 1, x + LOGOFUNNEL);
+    add_smoke(y - 1, x + ERUTASOFUNNEL);
     return OK;
 }
 
 
-int add_D51(int x)
+int add_mayakataso(int x)
 {
-    static char *d51[D51PATTERNS][D51HEIGHT + 1]
-        = {{D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL11, D51WHL12, D51WHL13, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL21, D51WHL22, D51WHL23, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL31, D51WHL32, D51WHL33, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL41, D51WHL42, D51WHL43, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL51, D51WHL52, D51WHL53, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL61, D51WHL62, D51WHL63, D51DEL}};
-    static char *coal[D51HEIGHT + 1]
-        = {COAL01, COAL02, COAL03, COAL04, COAL05,
-           COAL06, COAL07, COAL08, COAL09, COAL10, COALDEL};
+    static char *mayakataso[MAYAKATASOPATTERNS][MAYAKATASOHIGHT + 1]
+	= {{MAYAKATASO11, MAYAKATASO12, MAYAKATASO13, MAYAKATASO14, MAYAKATASO15, MAYAKATASO16, MAYAKATASO17, MAYAKATASO18, MAYAKATASO19, MAYAKATASO1DEL},
+	   {MAYAKATASO21, MAYAKATASO22, MAYAKATASO23, MAYAKATASO24, MAYAKATASO25, MAYAKATASO26, MAYAKATASO27, MAYAKATASO28, MAYAKATASO29, MAYAKATASO2DEL},
+	   {MAYAKATASO31, MAYAKATASO32, MAYAKATASO33, MAYAKATASO34, MAYAKATASO35, MAYAKATASO36, MAYAKATASO37, MAYAKATASO38, MAYAKATASO39, MAYAKATASO3DEL},
+	   {MAYAKATASO41, MAYAKATASO42, MAYAKATASO43, MAYAKATASO44, MAYAKATASO45, MAYAKATASO46, MAYAKATASO47, MAYAKATASO48, MAYAKATASO49, MAYAKATASO4DEL},
+	   {MAYAKATASO31, MAYAKATASO32, MAYAKATASO33, MAYAKATASO34, MAYAKATASO35, MAYAKATASO36, MAYAKATASO37, MAYAKATASO38, MAYAKATASO39, MAYAKATASO3DEL},
+	   {MAYAKATASO21, MAYAKATASO22, MAYAKATASO23, MAYAKATASO24, MAYAKATASO25, MAYAKATASO26, MAYAKATASO27, MAYAKATASO28, MAYAKATASO29, MAYAKATASO2DEL}};
 
-    int y, i, dy = 0;
+    int i, y;
 
-    if (x < - D51LENGTH)  return ERR;
-    y = LINES / 2 - 5;
+    if (x < - MAYAKATASOLENGTH)  return ERR;
+    y = LINES / 2 - 3;
 
     if (FLY == 1) {
-        y = (x / 7) + LINES - (COLS / 7) - D51HEIGHT;
-        dy = 1;
+		y = (x / 6) + LINES - (COLS / 6) - MAYAKATASOHIGHT;
     }
-    for (i = 0; i <= D51HEIGHT; ++i) {
-        my_mvaddstr(y + i, x, d51[(D51LENGTH + x) % D51PATTERNS][i]);
-        my_mvaddstr(y + i + dy, x + 53, coal[i]);
+    for (i = 0; i <= MAYAKATASOHIGHT; ++i) {
+		my_mvaddstr(y + i, x, mayakataso[(MAYAKATASOLENGTH + x) / 3 % MAYAKATASOPATTERNS][i]);
     }
     if (ACCIDENT == 1) {
-        add_man(y + 2, x + 43);
-        add_man(y + 2, x + 47);
+		add_fukuchan(y , x + 16);
     }
-    add_smoke(y - 1, x + D51FUNNEL);
+    add_smoke(y - 1, x + MAYAKATASOFUNNEL);
     return OK;
 }
 
-int add_C51(int x)
+
+int add_lolitaso(int x)
 {
-    static char *c51[C51PATTERNS][C51HEIGHT + 1]
-        = {{C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH11, C51WH12, C51WH13, C51WH14, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH21, C51WH22, C51WH23, C51WH24, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH31, C51WH32, C51WH33, C51WH34, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH41, C51WH42, C51WH43, C51WH44, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH51, C51WH52, C51WH53, C51WH54, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH61, C51WH62, C51WH63, C51WH64, C51DEL}};
-    static char *coal[C51HEIGHT + 1]
-        = {COALDEL, COAL01, COAL02, COAL03, COAL04, COAL05,
-           COAL06, COAL07, COAL08, COAL09, COAL10, COALDEL};
+    static char *LOLITASO[LOLITASOPATTERNS][LOLITASOHIGHT + 1]
+	= {{LOLITASO11, LOLITASO12, LOLITASO13, LOLITASO14, LOLITASO15, LOLITASO16, LOLITASO17, LOLITASO1DEL},
+	   {LOLITASO21, LOLITASO22, LOLITASO23, LOLITASO24, LOLITASO25, LOLITASO26, LOLITASO27, LOLITASO2DEL},
+	   {LOLITASO31, LOLITASO32, LOLITASO33, LOLITASO34, LOLITASO35, LOLITASO36, LOLITASO37, LOLITASO3DEL},
+	   {LOLITASO41, LOLITASO42, LOLITASO43, LOLITASO44, LOLITASO45, LOLITASO46, LOLITASO47, LOLITASO4DEL},
+	   {LOLITASO31, LOLITASO32, LOLITASO33, LOLITASO34, LOLITASO35, LOLITASO36, LOLITASO37, LOLITASO3DEL},
+	   {LOLITASO21, LOLITASO22, LOLITASO23, LOLITASO24, LOLITASO25, LOLITASO26, LOLITASO27, LOLITASO2DEL}};
 
-    int y, i, dy = 0;
+    int i, y;
 
-    if (x < - C51LENGTH)  return ERR;
-    y = LINES / 2 - 5;
+    if (x < - LOLITASOLENGTH)  return ERR;
+    y = LINES / 2 - 3;
 
     if (FLY == 1) {
-        y = (x / 7) + LINES - (COLS / 7) - C51HEIGHT;
-        dy = 1;
+		y = (x / 6) + LINES - (COLS / 6) - LOLITASOHIGHT;
     }
-    for (i = 0; i <= C51HEIGHT; ++i) {
-        my_mvaddstr(y + i, x, c51[(C51LENGTH + x) % C51PATTERNS][i]);
-        my_mvaddstr(y + i + dy, x + 55, coal[i]);
+    for (i = 0; i <= LOLITASOHIGHT; ++i) {
+		my_mvaddstr(y + i, x, LOLITASO[(LOLITASOLENGTH + x) / 3 % LOLITASOPATTERNS][i]);
     }
     if (ACCIDENT == 1) {
-        add_man(y + 3, x + 45);
-        add_man(y + 3, x + 49);
+		add_lolinarimasu(y , x + 13);
     }
-    add_smoke(y - 1, x + C51FUNNEL);
+    add_smoke(y - 1, x + LOLITASOFUNNEL);
     return OK;
 }
 
-
-void add_man(int y, int x)
+void add_kininarimasu(int y, int x)
 {
-    static char *man[2][2] = {{"", "(O)"}, {"Help!", "\\O/"}};
-    int i;
+	static char *man[2] = {"", "< KININARIMASU! "};
+	my_mvaddstr(y , x, man[(ERUTASOLENGTH + x) / 12 % 2]);
+}
 
-    for (i = 0; i < 2; ++i) {
-        my_mvaddstr(y + i, x, man[(LOGOLENGTH + x) / 12 % 2][i]);
-    }
+void add_fukuchan(int y, int x)
+{
+	static char *man[2] = {"", "< FUKUCHAN! "};
+	my_mvaddstr(y , x, man[(MAYAKATASOLENGTH + x) / 12 % 2]);
+}
+
+void add_lolinarimasu(int y, int x)
+{
+	static char *man[2] = {"", "< kininarimasu! "};
+	my_mvaddstr(y , x, man[(LOLITASOLENGTH + x) / 12 % 2]);
 }
 
 

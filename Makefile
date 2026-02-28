@@ -6,15 +6,17 @@
 #	Last Modified: 2014/03/31
 #==========================================
 
+#(2014/03/26 modified Taichi-Sugiyama)
+
 CC=gcc
 CFLAGS=-O -Wall
 
 all: sl
 
-sl: sl.c sl.h
-	$(CC) $(CFLAGS) -o sl sl.c -lncurses
+erutaso: sl.c sl.h
+	$(CC) $(CFLAGS) -o erutaso sl.c -lncurses
 
 clean:
-	rm -f sl
+	rm -f sl erutaso
 
 distclean: clean

@@ -1,10 +1,12 @@
-SL(1): Cure your bad habit of mistyping
-=======================================
+ERUTASO: キータイプ矯正ソフト
+========================
 
-SL (Steam Locomotive) runs across your terminal when you type "sl" as
-you meant to type "ls". It's just a joke command, and not useful at
-all.
+誰もが一度はlsとerutasoを打ち間違えたことがあるかと思います。
+そういった場合にでも癒やしを得ることが可能な非常に実用性の高いコマンドです。
+https://github.com/mtoyoda/sl
+からforkさせていただき作成しました。
+適当にmakeして適当にパスの通った場所へぶち込んでください。
 
-Copyright 1993,1998,2014 Toyoda Masashi (mtoyoda@acm.org)
+Copyright 1993,1998,2013 Toyoda Masashi (mtoyoda@acm.org)
 
 ![](demo.gif)
