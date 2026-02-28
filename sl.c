@@ -75,7 +75,7 @@ int my_mvaddstr(int y, int x, char *str)
 
 void option(char *str)
 {
-    extern int ACCIDENT, FLY, LONG;
+    extern int ACCIDENT, FLY, LOST_TIPPY, COCOA;
 
     while (*str != '\0') {
         switch (*str++) {
@@ -153,75 +153,133 @@ int main(int argc, char *argv[])
 
 int make_coffee(int f)
 {
-    static char *sl[LOGOPATTERNS][LOGOHIGHT + 1]
-        = {{LOGO1, LOGO2, LOGO3, LOGO4, LWHL11, LWHL12, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL21, LWHL22, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL31, LWHL32, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL41, LWHL42, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL51, LWHL52, DELLN},
-           {LOGO1, LOGO2, LOGO3, LOGO4, LWHL61, LWHL62, DELLN}};
+    // 参考：ご注文はうさぎですか？ 第一羽「ひと目で、尋常でないもふもふだと見抜いたよ」4:13頃〜
+    // http://www.nicovideo.jp/watch/1397552685
+    int x, y, p, top, middle, bottom, left, center, right, i;
+    int stir;
+    char drop;
 
-    static char *coal[LOGOHIGHT + 1]
-        = {LCOAL1, LCOAL2, LCOAL3, LCOAL4, LCOAL5, LCOAL6, DELLN};
+    x = (COLS - CHINOLENGTH) / 2;
+    y = (LINES - (COCOA == 1 ? COCOAHEIGHT : CHINOHEIGHT) + TIPPYHEIGHT) / 2;
+    top = y;
+    bottom = y + (COCOA == 1 ? COCOAHEIGHT : CHINOHEIGHT);
+    middle = (top + bottom) / 2;
+    left = x;
+    right = x + (COCOA == 1 ? COCOALENGTH : CHINOLENGTH);
+    center = (left + right) / 2;
+    
+    static char *grinder[GRINDERHEIGHT] = {GRINDER01, GRINDER02};
+    static char *handle[HANDLEPATTERNS] = {HANDLEA, HANDLEB, HANDLEC, HANDLED, HANDLEE, HANDLED, HANDLEF, HANDLEB};
+    static char *siphon[SIPHONHEIGHT] = {SIPHON01, SIPHON02, SIPHON03, SIPHON04};
+    static char *fire[FIREPATTERNS] = {FIRE01, FIRE02};
+    static char *lowersiphon[LOWERSIPHONPATTERNS] = {LOWERSIPHON01, LOWERSIPHON02};
+    static char *uppersiphon[UPPERSIPHONPATTERNS] = {UPPERSIPHON01, UPPERSIPHON02, UPPERSIPHON03};
+    static char *pour[POURPATTERNS] = {POUR01, POUR01, POUR01, POUR01, POUR02, POUR03, POUR03, POUR03};
 
-    static char *car[LOGOHIGHT + 1]
-        = {LCAR1, LCAR2, LCAR3, LCAR4, LCAR5, LCAR6, DELLN};
+    add_counter();
 
-    int i, y, py1 = 0, py2 = 0, py3 = 0;
-
-    if (x < - LOGOLENGTH)  return ERR;
-    y = LINES / 2 - 3;
-
-    if (FLY == 1) {
-        y = (x / 6) + LINES - (COLS / 6) - LOGOHIGHT;
-        py1 = 2;  py2 = 4;  py3 = 6;
+    p = (f <= STARTGRIND + SPANGRIND - 1|| STARTPOUR < f) ? 0 : 1;
+    if (COCOA == 1) {
+        add_cocoa_making_coffee(f, p);
+    } else {
+        add_chino_making_coffee(f, p);
     }
-    for (i = 0; i <= LOGOHIGHT; ++i) {
-        my_mvaddstr(y + i, x, sl[(LOGOLENGTH + x) / 3 % LOGOPATTERNS][i]);
-        my_mvaddstr(y + i + py1, x + 21, coal[i]);
-        my_mvaddstr(y + i + py2, x + 42, car[i]);
-        my_mvaddstr(y + i + py3, x + 63, car[i]);
+    // ｺﾞﾘｺﾞﾘｺﾞﾘｺﾞﾘｺﾞﾘｺﾞﾘｺﾞﾘｺﾞﾘｺﾞﾘｺﾞﾘ
+    if (f <= STARTGRIND + SPANGRIND - 1) {
+        for (i = 0; i < GRINDERHEIGHT ; i++) {
+            my_mvaddstr(bottom - GRINDERHEIGHT + 1 + i, center - GRINDERLENGTH / 2, grinder[i]);
+        }
+        my_mvaddstr(bottom - GRINDERHEIGHT, center - HANDLELENGTH / 2, handle[(f / 3) % HANDLEPATTERNS]);
     }
-    if (ACCIDENT == 1) {
-        add_man(y + 1, x + 14);
-        add_man(y + 1 + py2, x + 45);  add_man(y + 1 + py2, x + 53);
-        add_man(y + 1 + py3, x + 66);  add_man(y + 1 + py3, x + 74);
+
+    // Co+2Fe→Coffee
+    if (STARTHEAT <= f && f <= STARTPOUR) {
+        for (i = 0; i < SIPHONHEIGHT ; i++) {
+            my_mvaddstr(bottom - SIPHONHEIGHT + 1 + i, right - SIPHONLENGTH, siphon[i]);
+        }
+        my_mvaddstr(bottom - 3, right - SIPHONLENGTH + 1, uppersiphon[f < STARTEXTRACT ? 0 : (f < STARTEXTRACT + 4 ? 1 : 2)]);
+        my_mvaddstr(bottom - 2, right - SIPHONLENGTH + 1, lowersiphon[(f / 3) % LOWERSIPHONPATTERNS]);
+        my_mvaddstr(bottom - 1, right - SIPHONLENGTH + 1, fire[(f / 3) % FIREPATTERNS]);
+
+        if (STARTSTIR <= f && f < STARTSTIR + SPANSTIR) {
+            stir = (f / 6) % STIRPATTERNS;
+            if (stir > (STIRPATTERNS + 1) / 2) stir = STIRPATTERNS - stir;
+            mvaddch(bottom - 4, right - SIPHONLENGTH + 1 + stir , 'Q');
+            mvaddch(bottom - 3, right - SIPHONLENGTH + 1 + stir , '|');
+        }
     }
-    add_smoke(y - 1, x + LOGOFUNNEL);
+
+    // しげってんなぁー
+    if (STARTPOUR <= f && f < STARTPOUR + SPANPOUR) {
+        my_mvaddstr(bottom - 2, center - POURLENGTH / 2 , pour[(f - STARTPOUR) * POURPATTERNS / SPANPOUR]);
+        if (f < STARTPOUR + SPANPOUR * 5 / POURPATTERNS) {
+            drop = (f / 3) % 2 == 0 ? ':' : '|';
+        } else if (f < STARTPOUR + SPANPOUR * 6 / POURPATTERNS) {
+            drop = '.';
+        } else {
+            drop = ' ';
+        }
+        mvaddch(bottom - 1, center + POURLENGTH / 2 - 1, drop);
+        my_mvaddstr(bottom, center, TEACUP);
+    }
+
+    // お待たせしました。
+    if (STARTFINISHED <= f) {
+        if (f < STARTFINISHED + SPANFINISHED - 1) {
+            my_mvaddstr(middle, right, MESSAGE);
+        } else if (ACCIDENT == 1 && f < STARTACCIDENT1 + SPANACCIDENT1) {
+            my_mvaddstr(middle, right, MESSAGEACCIDENT1);
+        } else if (ACCIDENT == 1 && f < STARTACCIDENT2 + SPANACCIDENT2 - 1) {
+            my_mvaddstr(middle, right, MESSAGEACCIDENT2);
+        } else {
+            my_mvaddstr(middle, right, MESSAGEDEL);
+        }
+        if (f > STARTFINISHED + SPANFINISHED) {
+            my_mvaddstr(bottom, center - TEACUPLENGTH / 2, TEACUPACCIDENT);
+            my_mvaddstr(bottom + 1, center - TEACUPLENGTH / 2 + 3, "@@");
+            my_mvaddstr(bottom + 2, center - TEACUPLENGTH / 2 + 4, "@@@");
+
+        } else {
+            my_mvaddstr(bottom, center - TEACUPLENGTH / 2, TEACUP);
+        }
+    }
     return OK;
 }
 
 int add_chino_making_coffee(int f, int p)
 {
-    static char *d51[D51PATTERNS][D51HIGHT + 1]
-        = {{D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL11, D51WHL12, D51WHL13, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL21, D51WHL22, D51WHL23, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL31, D51WHL32, D51WHL33, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL41, D51WHL42, D51WHL43, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL51, D51WHL52, D51WHL53, D51DEL},
-           {D51STR1, D51STR2, D51STR3, D51STR4, D51STR5, D51STR6, D51STR7,
-            D51WHL61, D51WHL62, D51WHL63, D51DEL}};
-    static char *coal[D51HIGHT + 1]
-        = {COAL01, COAL02, COAL03, COAL04, COAL05,
-           COAL06, COAL07, COAL08, COAL09, COAL10, COALDEL};
+    static char *chino[2][CHINOHEIGHT]
+        = {{CHINOFRONT01, CHINOFRONT02, CHINOFRONT03, CHINOFRONT04, CHINOFRONT05, CHINOFRONT06, CHINOFRONT07, CHINOFRONT08},
+           {CHINORIGHT01, CHINORIGHT02, CHINORIGHT03, CHINORIGHT04, CHINORIGHT05, CHINORIGHT06, CHINORIGHT07, CHINORIGHT08}};
 
-    int y, i, dy = 0;
+    int x, y, i;
 
-    if (x < - D51LENGTH)  return ERR;
-    y = LINES / 2 - 5;
+    x = (COLS - CHINOLENGTH) / 2;
+    y = (LINES - CHINOHEIGHT + TIPPYHEIGHT) / 2;
 
-    if (FLY == 1) {
-        y = (x / 7) + LINES - (COLS / 7) - D51HIGHT;
-        dy = 1;
+    for (i = 0; i < CHINOHEIGHT; ++i) {
+        my_mvaddstr(y + i, x, chino[p][i]);
     }
-    for (i = 0; i <= D51HIGHT; ++i) {
-        my_mvaddstr(y + i, x, d51[(D51LENGTH + x) % D51PATTERNS][i]);
-        my_mvaddstr(y + i + dy, x + 53, coal[i]);
+    if (LOST_TIPPY != 1) {
+        add_tippy(y - TIPPYHEIGHT + 1, x + 3, p + 1, f);
+    }
+    add_smoke(y - (LOST_TIPPY != 1 ? TIPPYHEIGHT - 1 : 0) - 1, x + 5, f);
+    return OK;
+}
+
+int add_cocoa_making_coffee(int f, int p)
+{
+    static char *chino[2][CHINOHEIGHT]
+        = {{COCOAFRONT01, COCOAFRONT02, COCOAFRONT03, COCOAFRONT04, COCOAFRONT05, COCOAFRONT06, COCOAFRONT07, COCOAFRONT08},
+           {COCOARIGHT01, COCOARIGHT02, COCOARIGHT03, COCOARIGHT04, COCOARIGHT05, COCOARIGHT06, COCOARIGHT07, COCOARIGHT08}};
+
+    int x, y, i;
+
+    x = (COLS - CHINOLENGTH) / 2;
+    y = (LINES - CHINOHEIGHT + TIPPYHEIGHT) / 2;
+
+    for (i = 0; i < CHINOHEIGHT; ++i) {
+        my_mvaddstr(y + i, x, chino[p][i]);
     }
     if (LOST_TIPPY != 1) {
         add_tippy(y - TIPPYHEIGHT + 1, x + 3, p + 1, f);
@@ -239,35 +297,36 @@ void add_counter(){
 
 int add_chino(int x)
 {
-    static char *c51[C51PATTERNS][C51HIGHT + 1]
-        = {{C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH11, C51WH12, C51WH13, C51WH14, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH21, C51WH22, C51WH23, C51WH24, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH31, C51WH32, C51WH33, C51WH34, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH41, C51WH42, C51WH43, C51WH44, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH51, C51WH52, C51WH53, C51WH54, C51DEL},
-           {C51STR1, C51STR2, C51STR3, C51STR4, C51STR5, C51STR6, C51STR7,
-            C51WH61, C51WH62, C51WH63, C51WH64, C51DEL}};
-    static char *coal[C51HIGHT + 1]
-        = {COALDEL, COAL01, COAL02, COAL03, COAL04, COAL05,
-           COAL06, COAL07, COAL08, COAL09, COAL10, COALDEL};
+    static char *chino[CHINOPATTERNS][CHINOHEIGHT]
+        = {{CHINOLEFT01, CHINOLEFT02, CHINOLEFT03, CHINOLEFT04, CHINOLEFT05, CHINOLEFT06, CHINOLEFT07, CHINOLEFT08}};
 
     int y, i;
 
-    if (x < - C51LENGTH)  return ERR;
-    y = LINES / 2 - 5;
+    if (x < - CHINOLENGTH)  return ERR;
+    y = (LINES - CHINOHEIGHT + TIPPYHEIGHT) / 2;
 
-    if (FLY == 1) {
-        y = (x / 7) + LINES - (COLS / 7) - C51HIGHT;
-        dy = 1;
+    for (i = 0; i < CHINOHEIGHT; ++i) {
+        my_mvaddstr(y + i, x, chino[(CHINOLENGTH + x) / 3 % CHINOPATTERNS][i]);
     }
-    for (i = 0; i <= C51HIGHT; ++i) {
-        my_mvaddstr(y + i, x, c51[(C51LENGTH + x) % C51PATTERNS][i]);
-        my_mvaddstr(y + i + dy, x + 55, coal[i]);
+    if (LOST_TIPPY != 1) {
+        add_tippy(y - TIPPYHEIGHT + 1, x + 2, 0, x + (COCOA == 1 ? COCOALENGTH : CHINOLENGTH));
+    }
+    add_smoke(y - (LOST_TIPPY != 1 ? TIPPYHEIGHT - 1 : 0) - 1, x + CHINOLENGTH / 2, 0);
+    return OK;
+}
+
+int add_cocoa(int x)
+{
+    static char *cocoa[COCOAPATTERNS][COCOAHEIGHT]
+        = {{COCOALEFT01, COCOALEFT02, COCOALEFT03, COCOALEFT04, COCOALEFT05, COCOALEFT06, COCOALEFT07, COCOALEFT08}};
+
+    int y, i;
+
+    if (x < - COCOALENGTH)  return ERR;
+    y = (LINES - CHINOHEIGHT + TIPPYHEIGHT) / 2;
+
+    for (i = 0; i < COCOAHEIGHT; ++i) {
+        my_mvaddstr(y + i, x, cocoa[(COCOALENGTH + x) / 3 % COCOAPATTERNS][i]);
     }
     if (LOST_TIPPY != 1) {
         add_tippy(y - TIPPYHEIGHT + 1, x + 2, 0, x + (COCOA == 1 ? COCOALENGTH : CHINOLENGTH));
